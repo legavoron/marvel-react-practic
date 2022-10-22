@@ -40,8 +40,6 @@ const CharList = (props) => {
 
     }
 
-    console.log('charlist');
-    
 
     const itemRefs = useRef([]);
 

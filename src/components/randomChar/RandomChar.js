@@ -5,13 +5,17 @@ import Spinner from '../spinner/spinner';
 import ErrorMessage from '../errorMessage/errorMessage';
 import useMarvelService from '../../services/MarvelService';
 
+import {Transition} from 'react-transition-group';
+
 const RandomChar = () => {
 
     const [char, setChar] = useState({});
+    const [isHero, setIsHero] = useState(false);
     
     const {loading, error, getCharacter, clearError} = useMarvelService();
 
     useEffect(() => {
+        setIsHero(false)
         updateChar();
         const timerId = setInterval(updateChar, 60000);
 
@@ -22,6 +26,7 @@ const RandomChar = () => {
 
     const onCharLoaded = (char) => {
         setChar(char);
+        setIsHero(true)
     }
     
     const updateChar = () => {
@@ -35,24 +40,42 @@ const RandomChar = () => {
     const spinner = loading ? <Spinner/> : null;
     const content = !(loading || error || !char) ? <View char={char} /> : null;
 
+    const duration = 10000;
+    const defaultStyles = {
+        transition: `opacity ${duration}ms ease-in-out`,
+        opacyty: 0
+    }
+    const transitionStyles = {
+        entering: {opacity: 1},
+        entered: {opacity: 1},
+        exiting: {opacity: 0},
+        exited: {opacity: 0},
+    }
+
     return (
         <div className="randomchar">
             {errorMessage}
             {spinner}
             {content}
-            <div className="randomchar__static">
-                <p className="randomchar__title">
-                    Random character for today!<br/>
-                    Do you want to get to know him better?
-                </p>
-                <p className="randomchar__title">
-                    Or choose another one
-                </p>
-                <button onClick={updateChar} className="button button__main">
-                    <div className="inner">try it</div>
-                </button>
-                <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
-            </div>
+            <Transition 
+                in={isHero} 
+                timeout={duration}>
+                    {(state) => {
+                        <div className="randomchar__static" style={{...defaultStyles, ...transitionStyles[state]}}>
+                            <p className="randomchar__title">
+                                Random character for today!<br/>
+                                Do you want to get to know him better?
+                            </p>
+                            <p className="randomchar__title">
+                                Or choose another one
+                            </p>
+                            <button onClick={updateChar} className="button button__main">
+                                <div className="inner">try it</div>
+                            </button>
+                            <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
+                        </div>
+                    }}
+            </Transition>
         </div>
     )
 }
